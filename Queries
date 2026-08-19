@@ -1,0 +1,312 @@
+/* Change Over Time Analysis 
+#Advance Data Analytics
+*/
+select
+year(f.order_date) as Order_Date_By_Year,
+sum(f.sales) as Total_Sales,
+count(f.customer_key) as Total_Customers,
+sum(f.quantity) as Total_Quantity
+from gold.sales_fact as f
+where f.order_date is not null
+group by year(f.order_date)
+order by Order_Date_By_Year;
+go
+/* Change Over Time Analysis 
+#Advance Data Analytics
+*/
+select
+year(f.order_date) as Order_Date_By_Years,
+month(f.order_date) as Order_Date_By_Months,
+format(sum(f.sales),'c') as Total_Sales,
+count(f.customer_key) as Total_Customers,
+sum(f.quantity) as Total_Quantity
+from gold.sales_fact as f
+where f.order_date is not null
+group by month(f.order_date),
+year(f.order_date)
+order by Total_Sales desc;
+go
+
+-----OR
+select
+datetrunc(MONTH,f.order_date) as Order_Date_By_Months,
+format(sum(f.sales),'c') as Total_Sales,
+count(f.customer_key) as Total_Customers,
+sum(f.quantity) as Total_Quantity
+from gold.sales_fact as f
+where f.order_date is not null
+group by datetrunc(MONTH,f.order_date)
+order by Total_Sales desc;
+GO
+----OR
+select
+format(f.order_date,'yyyy-MMM') as Order_Date_By_Months,
+format(sum(f.sales),'c') as Total_Sales,
+count(f.customer_key) as Total_Customers,
+sum(f.quantity) as Total_Quantity
+from gold.sales_fact as f
+where f.order_date is not null
+group by format(f.order_date,'yyyy-MMM')
+order by Total_Sales desc;
+go
+/* Moving Total Sales & Moving Average
+#Advance Data Analytics Commulative Analysis
+*/
+select
+t.Month_vise,
+t.Total_Sales,
+sum(Total_Sales) over ( partition by Month_vise
+		order by Month_vise rows between 
+		current row and unbounded following ) 
+		as Running_Total_Sales,
+t.Avg_Price,
+avg(avg_price) over ( partition by Month_vise
+order by month_vise rows between current row 
+and unbounded following ) as Moving_Avg
+from (
+select
+datetrunc(month,f.order_date) as Month_vise,
+sum(f.sales) as Total_Sales,
+avg(f.price) as Avg_Price
+from gold.sales_fact as f
+where f.order_date is not null
+group by datetrunc(month,f.order_date)
+)t;
+/*	YEAR OVER YEAR ANALYSIS
+#Advance Data Analytics Performance Analysis
+*/
+--Analyze the yearly performance of products
+--by comparing their sales to both the avg sales
+--performance of the product and the previous year's sales
+with Yearly_Sales_Performance as (
+select
+year(f.order_date) as Year_Vise_Sales,
+p.product_name,
+sum(f.sales) as Total_Sales
+from gold.sales_fact as f
+left join gold.product_dim as p
+on f.product_key = p.product_key
+where f.order_date is not null
+group by 
+year(f.order_date),
+p.product_name
+)
+-----
+select*,
+avg(s.total_sales) over (partition by product_name ) as avg_sales,
+s.total_sales - avg(s.total_sales) over 
+		(partition by product_name ) as  Tracking_Sales,
+case when s.total_sales - avg(s.total_sales) over 
+		(partition by product_name )>0 then 'Above Avg'
+		when s.total_sales - avg(s.total_sales) over 
+		(partition by product_name )<0 then 'Below Avg'
+		else 'Avg'
+END as Categorization,
+lag(total_sales,1) over
+	(partition by product_name order by 
+		          s.Year_Vise_Sales ) as Previous_Years,
+Total_Sales - lag(total_sales,1) over
+	(partition by product_name order by 
+		          s.Year_Vise_Sales ) as diff_previous_Year,
+case when Total_Sales - lag(total_sales,1) over
+	(partition by product_name order by 
+		          s.Year_Vise_Sales )>0 then 'Increasing'
+		when Total_Sales - lag(total_sales,1) over
+	(partition by product_name order by 
+		          s.Year_Vise_Sales )<0 then 'Decreasing'
+		else 'No Change'
+END as flag_diff_previous_Year
+from Yearly_Sales_Performance as s
+;GO
+/*	PART TO WHOLE ANALYSIS
+#Advance Data Analytics Performance Analysis
+*/
+--Which Category Contribute the Most Overall Sales
+select*,
+sum(total_sales) over() as Overall_Sales,
+concat(round((cast(Total_Sales as float))/(sum(total_sales)
+		over())*100 ,2),'%') as Overall_Performance
+from 
+(select
+p.product_category,
+sum(f.sales) as Total_Sales
+from gold.sales_fact as f
+left join gold.product_dim as p
+on f.product_key = p.product_key
+group by p.product_category)t
+order by Overall_Performance desc;
+go
+/*	Performance ANALYSIS
+#Advance Data Analytics Performance Analysis
+*/
+--Which Category Contribute the Most Overall Sales
+select*,
+sum(total_sales) over() as Overall_Sales,
+concat(round((cast(Total_Sales as float))/(sum(total_sales)
+		over())*100 ,2),'%') as Overall_Performance
+from 
+(select
+p.product_category,
+sum(f.sales) as Total_Sales
+from gold.sales_fact as f
+left join gold.product_dim as p
+on f.product_key = p.product_key
+group by p.product_category)t
+order by Overall_Performance desc;
+go
+/*	Data Segement Analysis
+#Advance Data Analytics Data Segementation Analysis
+*/
+--Segment Products into cost range and count
+--how many products fall into each segment
+with segement_products as (
+select
+p.product_key,
+p.product_name,
+p.product_cost,
+case when product_cost<100 then 'Below - 100'
+	when product_cost between 100 and 500 then 'B/w 100 & 500'
+	when product_cost between 500 and 1000 then 'B/w 500 & 1000'
+	else 'Above 1000'
+end as cost_range
+from gold.product_dim as p
+)
+select
+sp.cost_range,
+count(sp.product_key) as Total_Products
+from segement_products as sp
+group by sp.cost_range
+order by Total_Products desc;
+go
+/*	Data Segement Analysis
+#Advance Data Analytics Data Segementation Analysis
+Group Customers Based on their Spending Behaviour
+ - VIP : Customers with atleast 12 months of History
+		and spending more than $ 5000
+- Regular : Customers with atleast 12 months of History
+		and spending = $ 5000 or less
+- New : Customers with lifespam less than 12 months
+and also find total number of customers by each Group
+*/
+with customer_spending_behaviour as (
+select
+c.customer_key,
+min(f.order_date) as First_Order,
+max(f.order_date) as Last_Order,
+sum(f.sales) as Total_Sales,
+datediff(month,min(f.order_date),max(f.order_date)) as Life_Spam
+from gold.sales_fact as f
+left join gold.customer_dim as c
+on f.customer_key = c.customer_key
+group by c.customer_key),
+customer_category as (
+select
+b.customer_key,
+b.Total_Sales,
+b.Life_Spam,
+case when Total_Sales > 5000 and Life_Spam >=12 then 'VIP Customer'
+	when Total_Sales <=5000 and Life_Spam >=12 then 'Regular Customer'
+	when Life_Spam<12 then 'New Customer'
+	else 'n/a'
+end as Customer_Category
+from customer_spending_behaviour as b
+where Life_Spam is not null)
+--------
+select
+Customer_Category,
+count(customer_key) as Total_Customers
+--and also find total number of customers by each Group
+from customer_category as c
+group by Customer_Category
+order by Total_Customers asc;
+go
+
+/*
+==================================================
+Customer Repoort
+==================================================
+Purpose : 
+		This Report Consolidates Key Customer matrics 
+		& Behaviour
+Highlights:
+ 1).  Gather essential fields such as names,ages & 
+		teansactional details.
+ 2).  Segement customers into categories 
+        (VIP,REGULAR & NEW )& age groups
+ 3). Aggregate customer level matrics:
+    - Total Orders
+	- Total Sales
+	- Total Quantity Purchased
+	- Total Products 
+	- Lifspan (in Months )
+ 4). Calculate the valuable KPIs:
+		recency ( Months since last Order )
+		average order value
+		average monthly spend
+*/
+create view gold.customer_report as 
+With base_report_step as (
+select
+f.sales_order_number,
+c.customer_key,
+c.customer_name,
+f.product_key,
+CONCAT(c.firstname,c.lastname) as Name,
+f.order_date,
+datediff(year,c.birthdate,getdate()) as age,
+f.price,
+f.quantity,
+f.sales
+from gold.sales_fact as f
+left Join gold.customer_dim as c
+on f.customer_key = c.customer_key
+where f.order_date is not null),
+----
+customer_aggregation as (
+select
+b.customer_key,
+b.customer_name,
+b.Name,
+b.age,
+count(distinct b.sales_order_number) as total_orders,
+sum(b.sales) as total_sales,
+sum(b.quantity) as total_quantity,
+datediff(month,max(b.order_date),GETDATE()) as recency,
+count( distinct b.product_key) as total_products,
+DATEDIFF(month,min(b.order_date),max(b.order_date)) as lifespan
+from base_report_step as b
+group by 
+	b.customer_key,
+	b.customer_name,
+	b.Name,
+	b.age
+)
+select
+cg.customer_key,
+cg.customer_name,
+cg.Name,
+cg.age,
+case when age <20 then 'Under 20'
+	when age between 20 and 29 then '20-29'
+	when age between 30 and 39 then '30-39'
+	when age between 40 and 49 then '40-49'
+	else '50 and above'
+end as age_category,
+case when total_sales> 5000 and lifespan>12 then 'VIP Customer'
+	when total_sales<= 5000 and lifespan>12 then 'Regular Customer'
+	when lifespan<12 then 'New Customer'
+	else 'n/a'
+end as customer_category,
+cg.recency,
+cg.total_orders,
+cg.total_sales,
+case when cg.total_sales  = 0 then 0
+	else cg.total_sales/cg.total_orders
+end  as average_order_value,
+case when lifespan = 0 then total_sales
+	else total_sales/lifespan 
+end as avg_monthly_spend,
+cg.total_quantity,
+cg.total_products,
+cg.lifespan
+from customer_aggregation AS cg;
