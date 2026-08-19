@@ -1,9 +1,9 @@
-📌 Project Overview
+📌 Project Overview :
 This project focuses on Advanced Data Analytics using SQL Server, transforming transactional sales data from a structured Gold Layer into meaningful business insights.
 The analysis covers sales trends, cumulative performance, year-over-year growth, category contribution, product segmentation, customer segmentation, and customer-level KPIs.
 The project demonstrates practical use of advanced SQL techniques including CTEs, Window Functions, CASE statements, JOINs, aggregate functions, date functions, subqueries, and SQL Views.
 ________________________________________
-🎯 Project Objectives
+🎯 Project Objectives :
 The main objectives of this project are to:
 •	Analyze sales performance over time.
 •	Identify monthly and yearly sales trends.
@@ -17,7 +17,7 @@ The main objectives of this project are to:
 •	Analyze customer demographics and purchasing behavior.
 •	Create a reusable customer analytics report using a SQL View.
 ________________________________________
-📊 1. Change Over Time Analysis
+📊 1. Change Over Time Analysis :
 The first analysis evaluates sales performance across different time periods.
 Yearly Analysis
 The query calculates:
@@ -38,7 +38,7 @@ Business Questions
 •	Which months performed best?
 •	How does sales volume change across different periods?
 ________________________________________
-📈 2. Cumulative Analysis
+📈 2. Cumulative Analysis :
 The project applies SQL Window Functions to calculate cumulative metrics.
 Metrics
 •	Running Total Sales
@@ -53,7 +53,7 @@ The analysis uses:
 Purpose
 Cumulative analysis helps understand how sales accumulate over time and provides a better view of overall performance trends.
 ________________________________________
-📅 3. Year-over-Year Performance Analysis
+📅 3. Year-over-Year Performance Analysis :
 The project analyzes yearly product performance by comparing each product's sales with:
 •	Its average yearly sales
 •	Previous year's sales
@@ -85,7 +85,7 @@ Business Questions
 •	Which products consistently perform above average?
 •	How much did sales change compared with the previous year?
 ________________________________________
-🥧 4. Part-to-Whole Analysis
+🥧 4. Part-to-Whole Analysis :
 This analysis determines how much each product category contributes to overall sales.
 Metrics
 •	Category Sales
@@ -100,7 +100,7 @@ Business Questions
 •	What percentage of total sales comes from each category?
 •	Which categories have the largest business impact?
 ________________________________________
-📦 5. Product Segmentation
+📦 5. Product Segmentation :
 Products are segmented according to their product cost.
 Product Cost Segments
 Cost Range	Segment
@@ -115,7 +115,7 @@ Business Questions
 •	What is the distribution of the product portfolio?
 •	Which cost segment contains the most products?
 ________________________________________
-👥 6. Customer Segmentation
+👥 6. Customer Segmentation :
 Customers are segmented according to their spending behavior and relationship lifespan.
 Customer Segments
 VIP Customer
@@ -139,7 +139,7 @@ Business Questions
 •	How many customers are new?
 •	Which customer segment represents the largest group?
 ________________________________________
-👤 7. Customer Report View
+👤 7. Customer Report View :
 A reusable SQL View named:
 gold.customer_report
 is created to consolidate customer-level information and KPIs.
@@ -167,7 +167,7 @@ Measures the customer's average spending per month during their relationship per
 Recency
 Measures the number of months since the customer's most recent order.
 ________________________________________
-🧮 8. Customer Age Segmentation
+🧮 8. Customer Age Segmentation :
 Customers are also grouped into age categories:
 •	Under 20
 •	20–29
@@ -176,7 +176,7 @@ Customers are also grouped into age categories:
 •	50 and Above
 This allows customer purchasing behavior to be analyzed across different demographic groups.
 ________________________________________
-🛠️ SQL Techniques Used
+🛠️ SQL Techniques Used :
 This project demonstrates practical use of:
 •	SELECT
 •	WHERE
@@ -205,7 +205,7 @@ This project demonstrates practical use of:
 •	Aggregate Functions
 •	Date Functions
 ________________________________________
-🗂️ Data Model
+🗂️ Data Model :
 The analysis uses a Gold Layer structure containing key tables such as:
 gold.sales_fact
 Contains transactional sales information including:
@@ -231,7 +231,7 @@ Contains customer-related information such as:
 •	Birth Date
 The fact and dimension tables are connected using their respective keys to perform analytical queries.
 ________________________________________
-📌 Key Business Insights Enabled
+📌 Key Business Insights Enabled :
 This project enables businesses to understand:
 •	Overall sales growth and trends.
 •	Monthly and yearly sales performance.
@@ -245,10 +245,10 @@ This project enables businesses to understand:
 •	Average customer order value.
 •	Average monthly customer spending.
 ________________________________________
-🚀 Skills Demonstrated
+🚀 Skills Demonstrated :
 SQL Server | Advanced SQL | Data Analysis | Business Analytics | Sales Analytics | Customer Analytics | Data Segmentation | Performance Analysis | Window Functions | CTEs | SQL Views | KPI Development | Data Transformation
 ________________________________________
-📁 Project Outcome
+📁 Project Outcome :
 The project converts raw transactional data into a structured analytical reporting layer, providing both high-level business performance analysis and detailed customer-level insights.
 It demonstrates how SQL can be used not only for querying data, but also for performing advanced business analysis and developing reusable analytical datasets for reporting and BI dashboards.
 
